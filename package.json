@@ -1,0 +1,40 @@
+{
+  "name": "babel-plugin-react-intl-extractor",
+  "version": "1.0.4",
+  "description": "Extracts string messages from translation from modules that use React Intl.",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bolid1/babel-plugin-react-intl-extractor.git"
+  },
+  "author": "Valery Vargin <VDVUGaD@gmail.com>",
+  "license": "BSD-3-Clause",
+  "keywords": [
+    "babel-plugin",
+    "react-intl",
+    "single-file"
+  ],
+  "bugs": {
+    "url": "https://github.com/Bolid1/babel-plugin-react-intl-extractor/issues"
+  },
+  "scripts": {
+    "lint": "eslint src/",
+    "clean": "rimraf lib/",
+    "build": "babel src/ --out-dir lib/",
+    "preversion": "npm run lint && npm run clean && npm run build",
+    "prepublish": "npm run clean && npm run build"
+  },
+  "homepage": "https://github.com/Bolid1/babel-plugin-react-intl-extractor#readme",
+  "dependencies": {
+    "babel-plugin-react-intl": "^3.0.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-proposal-optional-chaining": "^7.2.0",
+    "@babel/preset-env": "^7.3.1",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.13.0",
+    "rimraf": "^2.6.3"
+  }
+}
