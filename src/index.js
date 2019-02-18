@@ -48,8 +48,10 @@ export default function (pluginOptions) {
    */
   function mergeDescriptors (existing, descriptors) {
     return existing
+    // Remove from existing all messages with id, that used in descriptors
+      .filter((descriptor) => descriptors.findIndex(({id}) => id === descriptor.id) === -1)
+      // Merge with new descriptors array
       .concat(descriptors)
-      .filter((descriptor, i, a) => a.findIndex(({id}) => id === descriptor.id) === i)
       .sort((a, b) => {
         return (a.id < b.id) ? -1 : (a.id > b.id ? 1 : 0)
       })
