@@ -1,6 +1,6 @@
 import fs from 'fs'
 
-export default function (pluginOptions) {
+export default function (path, pluginOptions) {
   const options = Object.assign(
     {
       extractedFile: './src/translations/aggregated.json',

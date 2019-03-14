@@ -65,9 +65,13 @@ module.exports = override(
       "react-intl-extractor",
       {
         "extractedFile": "./src/translations/aggregated.json",
-        "langFiles": [
-          "./src/translations/en.json"
-        ]
+        "langFiles": [{
+          "path": "./src/translations/ru.json",
+          "cleanUpNewMessages": false
+        }, {
+          "path": "./src/translations/en.json",
+          "cleanUpNewMessages": true
+        }]
       }
     ]
   ]
@@ -82,7 +86,7 @@ because this plugin expects only "react-intl" value for param `moduleSourceName`
 
 - **`extractedFile`**: The target location where the plugin will output a descriptors for each component from which React Intl messages were extracted. Default: "./src/translations/aggregated.json"
 
-- **`langFiles`**: The target location where the plugin will output a messages (Object.<id, string>) for each component from which React Intl messages were extracted. Default: ["./src/translations/en.json", "./src/translations/ru.json"]
+- **`langFiles`**: The target location where the plugin will output a messages (Object.<id, string>) for each component from which React Intl messages were extracted. Default: [{ path: "./src/translations/en.json", cleanUpNewMessages: true }, { path: "./src/translations/ru.json", cleanUpNewMessages: false }]
 
 ### If you use [babel-plugin-react-intl-auto](https://github.com/akameco/babel-plugin-react-intl-auto)
 You must use plugins in that order:
