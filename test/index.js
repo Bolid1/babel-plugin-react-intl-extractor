@@ -52,3 +52,31 @@ tape.test('it should respect paths', (t) => {
   t.equal(trim(actualLang), trim(expectedLang), 'The lang file must contain messages')
   t.end()
 })
+
+tape.test('it should respect paths and remove unused messages', (t) => {
+  const fixtureDir = path.join(fixturesDir, 'main')
+  const extractedFile = path.join(fixtureDir, 'cleared-actual.json')
+  const langFile = path.join(fixtureDir, 'en.cleared-actual.json')
+
+  const actual = transform(path.join(fixtureDir, 'cleared-actual.js'), {
+    cleanUpUnusedMessages: true,
+    extractedFile: extractedFile,
+    langFiles: [
+      {
+        path: langFile,
+      },
+    ],
+  })
+  const expected = fs.readFileSync(path.join(fixtureDir, 'cleared-expected.js'))
+  t.equal(trim(actual), trim(expected), 'transform must be completed')
+  t.true(fs.existsSync(extractedFile), 'The extractedFile should exist')
+
+  const actualExtracted = fs.readFileSync(extractedFile)
+  const expectedExtracted = fs.readFileSync(path.join(fixtureDir, 'cleared-expected.json'))
+  t.equal(trim(actualExtracted), trim(expectedExtracted), 'The extracted file must contain messages')
+
+  const actualLang = fs.readFileSync(langFile)
+  const expectedLang = fs.readFileSync(path.join(fixtureDir, 'en.cleared-expected.json'))
+  t.equal(trim(actualLang), trim(expectedLang), 'The lang file must contain messages')
+  t.end()
+})

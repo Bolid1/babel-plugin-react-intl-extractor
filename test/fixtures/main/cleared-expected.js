@@ -32,10 +32,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 var msgs = (0, _reactIntl.defineMessages)({
-  header: {
-    "id": "foo.bar.baz",
-    "defaultMessage": "Hello World!"
-  },
   content: {
     "id": "foo.bar.biff",
     "defaultMessage": "Hello Nurse!"
@@ -56,7 +52,7 @@ function (_Component) {
   _createClass(Foo, [{
     key: "render",
     value: function render() {
-      return _react["default"].createElement("div", null, _react["default"].createElement("h1", null, _react["default"].createElement(_reactIntl.FormattedMessage, msgs.header)), _react["default"].createElement("p", null, _react["default"].createElement(_reactIntl.FormattedMessage, msgs.content)));
+      return _react["default"].createElement("div", null, _react["default"].createElement("p", null, _react["default"].createElement(_reactIntl.FormattedMessage, msgs.content)));
     }
   }]);
 
