@@ -64,6 +64,7 @@ module.exports = override(
     [
       "react-intl-extractor",
       {
+        "cleanUpUnusedMessages": false,
         "extractedFile": "./src/translations/aggregated.json",
         "langFiles": [{
           "path": "./src/translations/ru.json",
@@ -83,6 +84,8 @@ You can provide any parameter to react-intl plugin, except `moduleSourceName`,
 because this plugin expects only "react-intl" value for param `moduleSourceName`
 
 #### Options
+
+- **`cleanUpUnusedMessages`**: When active, unused message descriptors will be removed from extracted and lang files. Note: extracted file should be removed before enabling this option
 
 - **`extractedFile`**: The target location where the plugin will output a descriptors for each component from which React Intl messages were extracted. Default: "./src/translations/aggregated.json"
 
