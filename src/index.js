@@ -18,6 +18,7 @@ export default function (...args) {
   /**
    * @param {{id: string}} list
    * @param {string} id
+   * 
    * @returns {Object.<string, string>}
    */
   function findById (list, id) {
@@ -27,6 +28,7 @@ export default function (...args) {
   /**
    * @param {{id: string}} a
    * @param {{id: string}} b
+   * 
    * @returns {{id: string}[]}
    */
   function sortById (a, b) {
@@ -64,21 +66,26 @@ export default function (...args) {
   /**
    * @param {{id: string}[]} existing
    * @param {{id: string}[]} descriptors
-   * @param {string} filename
-   * @param {boolean} cleanUpUnusedMessages
    *
    * @returns {{id: string}[]}
    */
-  function mergeDescriptors(cleanUpUnusedMessages, existing, descriptors, filename) {
-    if (!cleanUpUnusedMessages) {
-      return existing
-        // Remove from existing all messages with id, that used in descriptors
-        .filter((descriptor) => !findById(descriptors, descriptor.id))
-        // Merge with new descriptors array
-        .concat(descriptors)
-        .sort(sortById)
-    }
+  function mergeDescriptors (existing, descriptors) {
+    return existing
+      // Remove from existing all messages with id, that used in descriptors
+      .filter((descriptor) => !findById(descriptors, descriptor.id))
+      // Merge with new descriptors array
+      .concat(descriptors)
+      .sort(sortById)
+  }
 
+  /**
+   * @param {{id: string}[]} existing
+   * @param {{id: string}[]} descriptors
+   * @param {string} filename
+   *
+   * @returns {{id: string}[]}
+   */
+  function mergeAndClearUnusedDescriptors (existing, descriptors, filename) {
     return existing
       .map((descriptor) => {
         return Object.assign(descriptor, {
@@ -97,11 +104,11 @@ export default function (...args) {
       .sort(sortById)
   }
 
-  function mergeMessages (cleanUpNewMessages, oldMessages, newMessages) {
-    if (!cleanUpNewMessages) {
-      return Object.assign(oldMessages, newMessages)
-    }
+  function mergeMessages (oldMessages, newMessages) {
+    return Object.assign(oldMessages, newMessages)
+  }
 
+  function mergeAndClearMessages (oldMessages, newMessages) {
     const result = Object.assign({}, oldMessages)
 
     Object
@@ -132,7 +139,9 @@ export default function (...args) {
 
       const existingDescriptors = getTargetFileContent()
       const descriptorsWithFiles = descriptors.map((descriptor) => Object.assign(descriptor, { files: [filename] }))
-      const resultDescriptors = mergeDescriptors(options.cleanUpUnusedMessages, existingDescriptors, descriptorsWithFiles, filename)
+      const resultDescriptors = options.cleanUpUnusedMessages ?
+        mergeAndClearUnusedDescriptors(existingDescriptors, descriptorsWithFiles, filename) :
+        mergeDescriptors(existingDescriptors, descriptorsWithFiles)
 
       if (!resultDescriptors?.length) {
         return
@@ -146,7 +155,10 @@ export default function (...args) {
       })
 
       options.langFiles.forEach(({path, cleanUpNewMessages}) => {
-        const resultMessages = mergeMessages(cleanUpNewMessages, getTargetLangFileContent(path), messages)
+        const oldMessages = getTargetLangFileContent(path)
+        const resultMessages = cleanUpNewMessages ?
+          mergeAndClearMessages(oldMessages, messages) :
+          mergeMessages(oldMessages, messages)
         const usedMessages = {}
 
         if (options.cleanUpUnusedMessages) {
