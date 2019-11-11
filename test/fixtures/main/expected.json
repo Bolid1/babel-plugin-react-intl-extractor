@@ -2,11 +2,17 @@
   {
     "id": "foo.bar.baz",
     "description": "The default message",
-    "defaultMessage": "Hello World!"
+    "defaultMessage": "Hello World!",
+    "files": [
+      "test/fixtures/main/actual.js"
+    ]
   },
   {
     "id": "foo.bar.biff",
     "description": "Another message",
-    "defaultMessage": "Hello Nurse!"
+    "defaultMessage": "Hello Nurse!",
+    "files": [
+      "test/fixtures/main/actual.js"
+    ]
   }
 ]

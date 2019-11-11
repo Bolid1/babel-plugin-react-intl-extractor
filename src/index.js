@@ -1,10 +1,12 @@
 import fs from 'fs'
+import path from 'path'
 
 export default function (...args) {
   const [, pluginOptions] = args
   const options = Object.assign(
     {
       extractedFile: './src/translations/aggregated.json',
+      cleanUpUnusedMessages: false,
       langFiles: [
         {path: './src/translations/ru.json', cleanUpNewMessages: false},
         {path: './src/translations/en.json', cleanUpNewMessages: true},
@@ -12,6 +14,26 @@ export default function (...args) {
     },
     pluginOptions,
   )
+
+  /**
+   * @param {{id: string}} list
+   * @param {string} id
+   * 
+   * @returns {Object.<string, string>}
+   */
+  function findById (list, id) {
+    return list.find((el) => el.id === id)
+  }
+
+  /**
+   * @param {{id: string}} a
+   * @param {{id: string}} b
+   * 
+   * @returns {{id: string}[]}
+   */
+  function sortById (a, b) {
+    return (a.id < b.id) ? -1 : (a.id > b.id ? 1 : 0)
+  }
 
   /**
    * @returns {Array}
@@ -49,20 +71,44 @@ export default function (...args) {
    */
   function mergeDescriptors (existing, descriptors) {
     return existing
-    // Remove from existing all messages with id, that used in descriptors
-      .filter((descriptor) => descriptors.findIndex(({id}) => id === descriptor.id) === -1)
+      // Remove from existing all messages with id, that used in descriptors
+      .filter((descriptor) => !findById(descriptors, descriptor.id))
       // Merge with new descriptors array
       .concat(descriptors)
-      .sort((a, b) => {
-        return (a.id < b.id) ? -1 : (a.id > b.id ? 1 : 0)
-      })
+      .sort(sortById)
   }
 
-  function mergeMessages (cleanUpNewMessages, oldMessages, newMessages) {
-    if (!cleanUpNewMessages) {
-      return Object.assign(oldMessages, newMessages)
-    }
+  /**
+   * @param {{id: string}[]} existing
+   * @param {{id: string}[]} descriptors
+   * @param {string} filename
+   *
+   * @returns {{id: string}[]}
+   */
+  function mergeAndClearUnusedDescriptors (existing, descriptors, filename) {
+    return existing
+      .map((descriptor) => {
+        return Object.assign(descriptor, {
+          files: descriptor.files
+            // Removed incoming filename from existing descriptors
+            .filter((file) => file !== filename)
+            // Add incoming filename to existing descriptors
+            .concat(findById(descriptors, descriptor.id) ? [filename] : []),
+        })
+      })
+      // Remove unused descriptors
+      .filter((descriptor) => descriptor.files.length > 0)
+      // Add new descriptors
+      .concat(descriptors.filter((descriptor) => !findById(existing, descriptor.id)))
+      // Sort descriptors
+      .sort(sortById)
+  }
 
+  function mergeMessages (oldMessages, newMessages) {
+    return Object.assign(oldMessages, newMessages)
+  }
+
+  function mergeAndClearMessages (oldMessages, newMessages) {
     const result = Object.assign({}, oldMessages)
 
     Object
@@ -80,6 +126,8 @@ export default function (...args) {
 
   return {
     post: function (file) {
+      const filename = path.relative(process.cwd(), file.opts.filename)
+
       if (!file.metadata['react-intl']?.messages?.length) {
         return
       }
@@ -90,7 +138,10 @@ export default function (...args) {
       }
 
       const existingDescriptors = getTargetFileContent()
-      const resultDescriptors = mergeDescriptors(existingDescriptors, descriptors)
+      const descriptorsWithFiles = descriptors.map((descriptor) => Object.assign(descriptor, { files: [filename] }))
+      const resultDescriptors = options.cleanUpUnusedMessages ?
+        mergeAndClearUnusedDescriptors(existingDescriptors, descriptorsWithFiles, filename) :
+        mergeDescriptors(existingDescriptors, descriptorsWithFiles)
 
       if (!resultDescriptors?.length) {
         return
@@ -104,9 +155,20 @@ export default function (...args) {
       })
 
       options.langFiles.forEach(({path, cleanUpNewMessages}) => {
-        const resultMessages = mergeMessages(cleanUpNewMessages, getTargetLangFileContent(path), messages)
+        const oldMessages = getTargetLangFileContent(path)
+        const resultMessages = cleanUpNewMessages ?
+          mergeAndClearMessages(oldMessages, messages) :
+          mergeMessages(oldMessages, messages)
+        const usedMessages = {}
 
-        fs.writeFileSync(path, JSON.stringify(resultMessages, null, 2))
+        if (options.cleanUpUnusedMessages) {
+          const usedKeys = Object.keys(resultMessages).filter((message) => findById(resultDescriptors, message))
+          usedKeys.forEach((key) => {
+            usedMessages[key] = resultMessages[key]
+          })
+        }
+
+        fs.writeFileSync(path, JSON.stringify(options.cleanUpUnusedMessages ? usedMessages : resultMessages, null, 2))
       })
     },
   }
