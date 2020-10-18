@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/Bolid1/babel-plugin-react-intl-extractor#readme",
   "dependencies": {
-    "babel-plugin-react-intl": "^3.0.1"
+    "babel-plugin-react-intl": "^8.2.7"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
